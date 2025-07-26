@@ -68,7 +68,14 @@ export default function Dashboard() {
           <div className="absolute bottom-4 left-4 text-4xl opacity-20">🌟</div>
           
           <div className="relative z-10">
-            <h2 className="font-fredoka text-3xl mb-2">Ready for WandSparkles Learning?</h2>
+            <h2 className="font-fredoka text-3xl mb-2">
+              Ready for magical learning, {user?.name || user?.username}?
+            </h2>
+            {user?.class && (
+              <p className="text-lg opacity-90 mb-2">
+                {user.class} • Learning Style: {user.learningStyle?.charAt(0).toUpperCase() + user.learningStyle?.slice(1)}
+              </p>
+            )}
             <p className="text-xl opacity-90 mb-6">
               You have <span className="font-bold">{spins?.spinsRemaining || 0} spins</span> left today!
             </p>
@@ -104,6 +111,65 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Personalized Learning Section */}
+        {user?.currentMood && user?.subjects && (
+          <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
+            <h3 className="font-fredoka text-2xl text-gray-800 mb-6">Your Learning Journey Today</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Current Mood */}
+              <div className="bg-gradient-to-r from-golden-yellow/10 to-orange-magic/10 rounded-xl p-6">
+                <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
+                  <span className="mr-2">🎭</span>
+                  How You're Feeling
+                </h4>
+                <div className="flex items-center space-x-3">
+                  <span className="text-3xl">
+                    {user.currentMood === 'happy' && '😊'}
+                    {user.currentMood === 'excited' && '🤩'}
+                    {user.currentMood === 'calm' && '😌'}
+                    {user.currentMood === 'curious' && '🤔'}
+                    {user.currentMood === 'tired' && '😴'}
+                    {user.currentMood === 'neutral' && '😐'}
+                  </span>
+                  <div>
+                    <p className="font-semibold text-gray-800 capitalize">{user.currentMood}</p>
+                    <p className="text-sm text-gray-600">
+                      {user.currentMood === 'happy' && 'Perfect mood for learning!'}
+                      {user.currentMood === 'excited' && 'Great energy for challenges!'}
+                      {user.currentMood === 'calm' && 'Ideal for focused learning'}
+                      {user.currentMood === 'curious' && 'Ready to explore new topics!'}
+                      {user.currentMood === 'tired' && 'Let\'s take it easy today'}
+                      {user.currentMood === 'neutral' && 'Ready for balanced learning'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Favorite Subjects */}
+              <div className="bg-gradient-to-r from-magic-purple/10 to-pink-magic/10 rounded-xl p-6">
+                <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
+                  <span className="mr-2">📚</span>
+                  Your Favorite Subjects
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {user.subjects?.map((subject) => (
+                    <span 
+                      key={subject}
+                      className="px-3 py-1 bg-magic-purple/20 text-magic-purple rounded-full text-sm font-medium capitalize"
+                    >
+                      {subject}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-600 mt-3">
+                  Games are personalized for your interests!
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Spinning Wheel Section */}
         <SpinningWheel spinsRemaining={spins?.spinsRemaining || 0} />
@@ -143,18 +209,23 @@ export default function Dashboard() {
                 color="blue" 
               />
               <ProgressBar 
-                label="Language Arts" 
-                value={progress?.languageSkills || 0} 
+                label="English Skills" 
+                value={progress?.englishSkills || 0} 
                 color="green" 
               />
               <ProgressBar 
-                label="Problem Solving" 
-                value={progress?.problemSolving || 0} 
+                label="Science Skills" 
+                value={progress?.scienceSkills || 0} 
                 color="purple" 
               />
               <ProgressBar 
-                label="Memory Skills" 
-                value={progress?.memorySkills || 0} 
+                label="Coding Skills" 
+                value={progress?.codingSkills || 0} 
+                color="orange" 
+              />
+              <ProgressBar 
+                label="Art Skills" 
+                value={progress?.artSkills || 0} 
                 color="pink" 
               />
             </div>

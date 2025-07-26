@@ -3,7 +3,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { X, Calculator, Book, Brain, Palette, Eye, Volume2, HandMetal, Contrast, Type } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { X, Calculator, Book, Brain, Palette, Eye, Volume2, HandMetal, Contrast, Type, Code, Beaker } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -13,9 +14,13 @@ interface SurveyModalProps {
 }
 
 export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
+  const [name, setName] = useState<string>("");
   const [age, setAge] = useState<number | null>(null);
-  const [interests, setInterests] = useState<string[]>([]);
+  const [studentClass, setStudentClass] = useState<string>("");
+  const [specialNeed, setSpecialNeed] = useState<string>("");
   const [learningStyle, setLearningStyle] = useState<string>("");
+  const [subjects, setSubjects] = useState<string[]>([]);
+  const [currentMood, setCurrentMood] = useState<string>("");
   const [accessibilityNeeds, setAccessibilityNeeds] = useState<string[]>([]);
   
   const { toast } = useToast();
@@ -46,7 +51,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!age || interests.length === 0 || !learningStyle) {
+    if (!name || !age || !studentClass || !specialNeed || !learningStyle || subjects.length === 0 || !currentMood) {
       toast({
         title: "Incomplete Survey",
         description: "Please fill in all required fields.",
@@ -56,18 +61,22 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
     }
 
     submitSurveyMutation.mutate({
+      name,
       age,
-      interests,
+      class: studentClass,
+      specialNeed,
       learningStyle,
+      subjects,
+      currentMood,
       accessibilityNeeds,
     });
   };
 
-  const toggleInterest = (interest: string) => {
-    setInterests(prev => 
-      prev.includes(interest) 
-        ? prev.filter(i => i !== interest)
-        : [...prev, interest]
+  const toggleSubject = (subject: string) => {
+    setSubjects(prev => 
+      prev.includes(subject) 
+        ? prev.filter(s => s !== subject)
+        : [...prev, subject]
     );
   };
 
@@ -89,50 +98,81 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Name Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">What's your name?</label>
+            <Input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your full name"
+              className="w-full"
+            />
+          </div>
+
           {/* Age Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">What's your age group?</label>
-            <div className="grid grid-cols-2 gap-3">
+            <label className="block text-sm font-medium text-gray-700 mb-2">What's your age?</label>
+            <div className="grid grid-cols-3 gap-3">
               <Button
                 type="button"
                 variant={age === 7 ? "default" : "outline"}
                 onClick={() => setAge(7)}
-                className="p-4 h-auto text-left flex-col items-start"
+                className="p-4 h-auto text-center"
               >
-                <div className="font-semibold">6-8 years</div>
-                <div className="text-sm text-gray-500">Early learner</div>
+                6-8 years
               </Button>
               <Button
                 type="button"
                 variant={age === 10 ? "default" : "outline"}
                 onClick={() => setAge(10)}
-                className="p-4 h-auto text-left flex-col items-start"
+                className="p-4 h-auto text-center"
               >
-                <div className="font-semibold">9-12 years</div>
-                <div className="text-sm text-gray-500">Advanced learner</div>
+                9-12 years
+              </Button>
+              <Button
+                type="button"
+                variant={age === 15 ? "default" : "outline"}
+                onClick={() => setAge(15)}
+                className="p-4 h-auto text-center"
+              >
+                13-18 years
               </Button>
             </div>
           </div>
-          
-          {/* Interests Selection */}
+
+          {/* Class Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">What do you love learning about?</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">What class/grade are you in?</label>
+            <Input
+              type="text"
+              value={studentClass}
+              onChange={(e) => setStudentClass(e.target.value)}
+              placeholder="e.g., 5th Grade, Class 8, etc."
+              className="w-full"
+            />
+          </div>
+
+          {/* Special Need Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Do you have any special learning needs?</label>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { id: "math", label: "Math & Numbers", icon: Calculator },
-                { id: "reading", label: "Reading & Writing", icon: Book },
-                { id: "logic", label: "Logic & Puzzles", icon: Brain },
-                { id: "art", label: "Art & Creativity", icon: Palette },
-              ].map(({ id, label, icon: Icon }) => (
+                { id: "autism", label: "Autism" },
+                { id: "adhd", label: "ADHD" },
+                { id: "dyslexia", label: "Dyslexia" },
+                { id: "physical", label: "Physical Disability" },
+                { id: "other", label: "Other" },
+                { id: "none", label: "None" },
+              ].map(({ id, label }) => (
                 <Button
                   key={id}
                   type="button"
-                  variant={interests.includes(id) ? "default" : "outline"}
-                  onClick={() => toggleInterest(id)}
-                  className="p-4 h-auto text-left justify-start"
+                  variant={specialNeed === id ? "default" : "outline"}
+                  onClick={() => setSpecialNeed(id)}
+                  className="p-3 h-auto text-center"
                 >
-                  <Icon className="mr-3 h-5 w-5" />
-                  <span>{label}</span>
+                  {label}
                 </Button>
               ))}
             </div>
@@ -144,8 +184,8 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
             <div className="space-y-3">
               {[
                 { id: "visual", label: "Visual Learning", description: "I learn with pictures and colors", icon: Eye },
-                { id: "audio", label: "Audio Learning", description: "I learn by listening", icon: Volume2 },
-                { id: "hands-on", label: "Hands-On Learning", description: "I learn by doing and touching", icon: HandMetal },
+                { id: "auditory", label: "Auditory Learning", description: "I learn by listening", icon: Volume2 },
+                { id: "kinesthetic", label: "Kinesthetic Learning", description: "I learn by doing and touching", icon: HandMetal },
               ].map(({ id, label, description, icon: Icon }) => (
                 <Button
                   key={id}
@@ -163,10 +203,61 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
               ))}
             </div>
           </div>
+
+          {/* Subjects Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Which subjects interest you? (Select all that apply)</label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { id: "english", label: "English", icon: Book },
+                { id: "math", label: "Math", icon: Calculator },
+                { id: "science", label: "Science", icon: Beaker },
+                { id: "coding", label: "Coding", icon: Code },
+                { id: "art", label: "Art", icon: Palette },
+              ].map(({ id, label, icon: Icon }) => (
+                <Button
+                  key={id}
+                  type="button"
+                  variant={subjects.includes(id) ? "default" : "outline"}
+                  onClick={() => toggleSubject(id)}
+                  className="p-4 h-auto text-left justify-start"
+                >
+                  <Icon className="mr-3 h-5 w-5" />
+                  <span>{label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Current Mood Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">How are you feeling today?</label>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { id: "happy", emoji: "😊", label: "Happy" },
+                { id: "excited", emoji: "🤩", label: "Excited" },
+                { id: "calm", emoji: "😌", label: "Calm" },
+                { id: "curious", emoji: "🤔", label: "Curious" },
+                { id: "tired", emoji: "😴", label: "Tired" },
+                { id: "neutral", emoji: "😐", label: "Neutral" },
+              ].map(({ id, emoji, label }) => (
+                <Button
+                  key={id}
+                  type="button"
+                  variant={currentMood === id ? "default" : "outline"}
+                  onClick={() => setCurrentMood(id)}
+                  className="p-3 h-auto text-center flex flex-col items-center"
+                >
+                  <span className="text-2xl mb-1">{emoji}</span>
+                  <span className="text-sm">{label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
           
           {/* Accessibility Needs */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Do you need any special help?</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Do you need any accessibility features?</label>
             <div className="space-y-3">
               {[
                 { id: "high-contrast", label: "High contrast colors", icon: Contrast },

@@ -1,7 +1,7 @@
 interface ProgressBarProps {
   label: string;
   value: number;
-  color: "blue" | "green" | "purple" | "pink";
+  color: "blue" | "green" | "purple" | "pink" | "orange";
 }
 
 export default function ProgressBar({ label, value, color }: ProgressBarProps) {
@@ -11,6 +11,7 @@ export default function ProgressBar({ label, value, color }: ProgressBarProps) {
       green: "from-green-400 to-green-600",
       purple: "from-purple-400 to-purple-600",
       pink: "from-pink-400 to-pink-600",
+      orange: "from-orange-400 to-orange-600",
     };
     return gradients[color as keyof typeof gradients];
   };

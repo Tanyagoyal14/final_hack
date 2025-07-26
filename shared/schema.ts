@@ -7,9 +7,14 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  name: text("name"),
   age: integer("age"),
+  class: text("class"),
+  specialNeed: text("special_need"),
   learningStyle: text("learning_style"),
   interests: jsonb("interests").$type<string[]>(),
+  subjects: jsonb("subjects").$type<string[]>(),
+  currentMood: text("current_mood"),
   accessibilityNeeds: jsonb("accessibility_needs").$type<string[]>(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -19,6 +24,10 @@ export const userProgress = pgTable("user_progress", {
   userId: varchar("user_id").references(() => users.id).notNull(),
   totalXp: integer("total_xp").default(0),
   mathSkills: integer("math_skills").default(0),
+  englishSkills: integer("english_skills").default(0),
+  scienceSkills: integer("science_skills").default(0),
+  codingSkills: integer("coding_skills").default(0),
+  artSkills: integer("art_skills").default(0),
   languageSkills: integer("language_skills").default(0),
   problemSolving: integer("problem_solving").default(0),
   memorySkills: integer("memory_skills").default(0),
@@ -91,9 +100,13 @@ export const insertGameStatsSchema = createInsertSchema(gameStats).omit({
 
 // Survey schema
 export const surveySchema = z.object({
+  name: z.string().min(1),
   age: z.number().min(6).max(18),
-  interests: z.array(z.string()).min(1),
-  learningStyle: z.enum(["visual", "audio", "hands-on"]),
+  class: z.string().min(1),
+  specialNeed: z.enum(["autism", "adhd", "dyslexia", "physical", "other"]),
+  learningStyle: z.enum(["visual", "auditory", "kinesthetic"]),
+  subjects: z.array(z.string()).min(1),
+  currentMood: z.string(),
   accessibilityNeeds: z.array(z.string()).optional(),
 });
 

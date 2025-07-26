@@ -1,0 +1,33 @@
+Keep the existing code as it is. Now add the following features into the same project:
+
+After successful Sign-Up/Login, redirect the user automatically to a Survey Page (do not skip it).
+
+Fields in Survey:
+
+Name
+
+Age
+
+Class
+
+Type of special need (Autism, ADHD, Dyslexia, Physical Disability, Other)
+
+Preferred learning style (Visual, Auditory, Kinesthetic)
+
+Subjects interested in (checkboxes: English, Math, Science, Coding, Art)
+
+Current mood (emoji or smiley based)
+
+After survey is submitted, take the user to a Dashboard page that includes:
+
+🎯 Subject-wise progress tracker (visually display % progress or bars)
+
+🎡 Spin wheel ("Spin to Learn" feature with rewards or tasks shown after spinning)
+
+📚 Auto-suggest YouTube videos or books based on their subjects and mood (you can use placeholder links)
+
+🎖️ Show earned badges or rewards for completed tasks
+
+😊 Mood tracker that updates daily
+
+All should work inside the same app, keep session or use localStorage to store survey and progress data. Use JavaScript, Tailwind CSS, or simple CSS only. No backend required. Keep UI magical and accessible.

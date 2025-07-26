@@ -64,18 +64,23 @@ Five interactive educational games with progress tracking:
 - **Color Match**: Color recognition and learning
 
 ### Progress Tracking
-Multi-dimensional skill progression system:
-- Total XP accumulation
-- Category-specific skills (Math, Language, Problem Solving, Memory)
-- Learning streaks and achievement system
-- Daily activity tracking
+Enhanced multi-dimensional skill progression system for personalized learning:
+- **Total XP accumulation** across all subjects and activities
+- **Subject-specific skills**: Math, English, Science, Coding, Art with individual progress tracking
+- **Core Skills**: Language Arts, Problem Solving, Memory Skills for foundational abilities
+- **Learning streaks** and achievement system with milestone badges
+- **Daily activity tracking** with mood-based content recommendations
+- **Special Needs Adaptation**: Progress tracking adapted to individual learning capabilities
 
 ### Survey & Personalization
-User profiling system for customized experiences:
-- Age-appropriate content selection
-- Learning style preferences (Visual, Auditory, Kinesthetic)
-- Interest-based game recommendations
-- Accessibility needs assessment
+Enhanced user profiling system for students with special needs:
+- **Personal Information**: Name, age, class/grade level
+- **Special Needs Assessment**: Support for Autism, ADHD, Dyslexia, Physical disabilities
+- **Learning Style Preferences**: Visual, Auditory, Kinesthetic learning approaches
+- **Subject Interests**: Math, English, Science, Coding, Art with personalized content
+- **Mood Tracking**: Daily mood assessment (Happy, Excited, Calm, Curious, Tired, Neutral)
+- **Accessibility Features**: High contrast, large text, audio support
+- **Personalized Dashboard**: Content adaptation based on learning needs and current mood
 
 ## Data Flow
 

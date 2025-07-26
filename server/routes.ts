@@ -23,9 +23,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const surveyData = surveySchema.parse(req.body);
       const user = await storage.updateUser("default-user", {
+        name: surveyData.name,
         age: surveyData.age,
-        interests: surveyData.interests,
+        class: surveyData.class,
+        specialNeed: surveyData.specialNeed,
         learningStyle: surveyData.learningStyle,
+        subjects: surveyData.subjects,
+        currentMood: surveyData.currentMood,
         accessibilityNeeds: surveyData.accessibilityNeeds || [],
       });
       
