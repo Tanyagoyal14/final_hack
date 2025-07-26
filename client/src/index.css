@@ -61,7 +61,7 @@
   }
 
   body {
-    @apply font-sans antialiased bg-gradient-to-br from-purple-50 to-pink-50 text-foreground;
+    @apply font-sans antialiased bg-gradient-to-br from-blue-50 to-cyan-50 text-foreground;
   }
 }
 
