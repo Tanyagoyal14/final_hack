@@ -64,6 +64,7 @@ export class DatabaseStorage implements IStorage {
       const defaultUser: InsertUser = {
         username: "Tanya",
         password: "password",
+        email: "tanya@example.com",
         name: "Tanya Goyal",
         age: 10,
         class: "5th Grade",
@@ -76,7 +77,33 @@ export class DatabaseStorage implements IStorage {
       };
 
       const userWithId = { ...defaultUser, id: "default-user" } as InsertUser & { id: string };
-      await this.createUser(userWithId);
+      
+      // Create demo user for testing
+      const demoUser: InsertUser = {
+        username: "demo",
+        password: "password",
+        email: "demo@example.com",
+        name: "Demo User",
+        age: 12,
+        class: "6th Grade",
+        specialNeed: "none",
+        learningStyle: "visual",
+        subjects: ["math", "science"],
+        currentMood: "happy",
+      };
+      const demoUserWithId = { ...demoUser, id: "demo-user" } as InsertUser & { id: string };
+
+      try {
+        // Hash passwords before creating users
+        const bcrypt = require('bcrypt');
+        userWithId.password = await bcrypt.hash(userWithId.password, 10);
+        demoUserWithId.password = await bcrypt.hash(demoUserWithId.password, 10);
+        
+        await this.createUser(userWithId);
+        await this.createUser(demoUserWithId);
+      } catch (error) {
+        console.log("Users may already exist, continuing...");
+      }
 
       // Create initial progress starting at 0%
       await this.updateUserProgress("default-user", {
@@ -118,8 +145,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
+    try {
+      const [user] = await db.select().from(users).where(eq(users.username, username));
+      return user || undefined;
+    } catch (error) {
+      console.error("Error getting user by username:", error);
+      return undefined;
+    }
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
