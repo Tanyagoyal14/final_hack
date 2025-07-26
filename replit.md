@@ -30,7 +30,7 @@ The server uses Express.js with TypeScript in a modular structure:
 **Rationale**: Familiar Node.js ecosystem with strong TypeScript support
 
 - **API Layer**: RESTful endpoints in `/server/routes.ts`
-- **Storage Layer**: Abstracted storage interface with in-memory implementation
+- **Storage Layer**: Abstracted storage interface with PostgreSQL database implementation
 - **Validation**: Zod schemas for request/response validation
 - **Development**: Hot module replacement via Vite integration
 
@@ -38,12 +38,14 @@ The server uses Express.js with TypeScript in a modular structure:
 Uses PostgreSQL with Drizzle ORM for type-safe database operations:
 
 **Problem Addressed**: Need for robust data persistence with type safety
-**Solution**: PostgreSQL with Drizzle ORM and Neon serverless hosting
+**Solution**: PostgreSQL with Drizzle ORM and serverless hosting
 **Rationale**: Excellent performance, ACID compliance, and seamless TypeScript integration
 
 - **ORM**: Drizzle ORM with schema-first approach
-- **Migrations**: Automated migration system via drizzle-kit
-- **Connection**: Neon serverless PostgreSQL for scalability
+- **Tables**: Users, UserProgress, DailySpins, UnlockedGames, Achievements, GameStats
+- **Enhanced Fields**: Special needs assessment, mood tracking, subject preferences
+- **Migrations**: Automated schema push via drizzle-kit
+- **Connection**: Serverless PostgreSQL with connection pooling
 
 ## Key Components
 
