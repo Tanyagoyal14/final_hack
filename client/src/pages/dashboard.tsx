@@ -40,7 +40,22 @@ export default function Dashboard() {
   const unlockedGameIds = unlockedGames?.map(game => game.gameId) || [];
 
   const continueLearningMutation = useMutation({
-    mutationFn: () => apiRequest("/api/user/continue-learning", { method: "POST" }),
+    mutationFn: async () => {
+      const response = await fetch("/api/user/continue-learning", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update progress");
+      }
+      
+      return response.json();
+    },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/progress"] });
       toast({
@@ -48,10 +63,10 @@ export default function Dashboard() {
         description: data.message || "Keep up the excellent learning!",
       });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to update progress. Please try again.",
+        description: error.message || "Failed to update progress. Please try again.",
         variant: "destructive",
       });
     },
@@ -113,7 +128,7 @@ export default function Dashboard() {
             </h2>
             {user?.class && (
               <p className="text-lg opacity-90 mb-2">
-                {user.class} • Learning Style: {user.learningStyle?.charAt(0).toUpperCase() + user.learningStyle?.slice(1) || 'Visual'}
+                {user.class} • Learning Style: {user.learningStyle ? (user.learningStyle.charAt(0).toUpperCase() + user.learningStyle.slice(1)) : 'Visual'}
               </p>
             )}
             <p className="text-xl opacity-90 mb-6">

@@ -344,15 +344,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Continue learning progress
-  app.post("/api/user/continue-learning", async (req, res) => {
+  app.post("/api/user/continue-learning", async (req: any, res) => {
     try {
-      const currentProgress = await storage.getUserProgress("default-user");
+      // Use session user or default for backward compatibility
+      const userId = req.session?.userId || "default-user";
+      const currentProgress = await storage.getUserProgress(userId);
       if (!currentProgress) {
         return res.status(404).json({ message: "Progress not found" });
       }
 
       // Increase all skills by 5%
-      const updatedProgress = await storage.updateUserProgress("default-user", {
+      const updatedProgress = await storage.updateUserProgress(userId, {
         totalXp: (currentProgress.totalXp || 0) + 25,
         mathSkills: Math.min(100, (currentProgress.mathSkills || 0) + 5),
         englishSkills: Math.min(100, (currentProgress.englishSkills || 0) + 5),
