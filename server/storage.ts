@@ -61,9 +61,9 @@ export class DatabaseStorage implements IStorage {
 
       // Create default user with enhanced survey data
       const defaultUser: InsertUser = {
-        username: "Alex",
+        username: "Tanya",
         password: "password",
-        name: "Alex Martinez",
+        name: "Tanya Goyal",
         age: 10,
         class: "5th Grade",
         specialNeed: "adhd",
@@ -77,18 +77,18 @@ export class DatabaseStorage implements IStorage {
       const userWithId = { ...defaultUser, id: "default-user" } as InsertUser & { id: string };
       await this.createUser(userWithId);
 
-      // Create initial progress
+      // Create initial progress starting at 0%
       await this.updateUserProgress("default-user", {
-        totalXp: 1247,
-        mathSkills: 78,
-        englishSkills: 65,
-        scienceSkills: 70,
-        codingSkills: 45,
-        artSkills: 85,
-        languageSkills: 65,
-        problemSolving: 82,
-        memorySkills: 71,
-        learningStreak: 5,
+        totalXp: 0,
+        mathSkills: 0,
+        englishSkills: 0,
+        scienceSkills: 0,
+        codingSkills: 0,
+        artSkills: 0,
+        languageSkills: 0,
+        problemSolving: 0,
+        memorySkills: 0,
+        learningStreak: 0,
         lastActiveDate: new Date(),
       });
 
@@ -292,9 +292,9 @@ export class MemStorage implements IStorage {
   private async initializeDefaultUser() {
     const defaultUser: User = {
       id: "default-user",
-      username: "Alex",
+      username: "Tanya",
       password: "password",
-      name: "Alex Martinez",
+      name: "Tanya Goyal",
       age: 10,
       class: "5th Grade",
       specialNeed: "adhd",
@@ -308,20 +308,20 @@ export class MemStorage implements IStorage {
     
     this.users.set(defaultUser.id, defaultUser);
     
-    // Initialize progress
+    // Initialize progress starting at 0%
     const progress: UserProgress = {
       id: randomUUID(),
       userId: defaultUser.id,
-      totalXp: 1247,
-      mathSkills: 78,
-      englishSkills: 65,
-      scienceSkills: 70,
-      codingSkills: 45,
-      artSkills: 85,
-      languageSkills: 65,
-      problemSolving: 82,
-      memorySkills: 71,
-      learningStreak: 5,
+      totalXp: 0,
+      mathSkills: 0,
+      englishSkills: 0,
+      scienceSkills: 0,
+      codingSkills: 0,
+      artSkills: 0,
+      languageSkills: 0,
+      problemSolving: 0,
+      memorySkills: 0,
+      learningStreak: 0,
       lastActiveDate: new Date(),
     };
     this.userProgress.set(defaultUser.id, progress);

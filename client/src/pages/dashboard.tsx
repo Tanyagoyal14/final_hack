@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import AccessibilityToolbar from "@/components/accessibility-toolbar";
 import SpinningWheel from "@/components/spinning-wheel";
@@ -6,11 +6,16 @@ import GameCard from "@/components/game-card";
 import ProgressBar from "@/components/progress-bar";
 import SurveyModal from "@/components/survey-modal";
 import { AVAILABLE_GAMES } from "@/lib/games";
-import { Star, Trophy, Flame, WandSparkles } from "lucide-react";
+import { Star, Trophy, Flame, WandSparkles, Sun, Moon, Play } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { User, UserProgress, DailySpins, UnlockedGame, Achievement } from "@shared/schema";
 
 export default function Dashboard() {
   const [showSurvey, setShowSurvey] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: user } = useQuery<User>({
     queryKey: ["/api/user/current"],
@@ -34,21 +39,55 @@ export default function Dashboard() {
 
   const unlockedGameIds = unlockedGames?.map(game => game.gameId) || [];
 
+  const continueLearningMutation = useMutation({
+    mutationFn: () => apiRequest("/api/user/continue-learning", { method: "POST" }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user/progress"] });
+      toast({
+        title: "Great Progress!",
+        description: data.message || "Keep up the excellent learning!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update progress. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+    document.documentElement.classList.toggle("dark", !isDark);
+  };
+
   return (
-    <div className="min-h-screen bg-white">
+    <div className={`min-h-screen transition-colors ${isDark ? 'dark bg-gray-900' : 'bg-white'}`}>
       <AccessibilityToolbar user={user} />
       
       {/* Main Navigation */}
-      <nav className="bg-white shadow-lg border-b">
+      <nav className="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
                 <WandSparkles className="text-white text-lg" />
               </div>
-              <h1 className="font-bold text-2xl text-purple-700">MagiLearn</h1>
+              <h1 className="font-bold text-2xl text-purple-700 dark:text-purple-400">MagiLearn</h1>
             </div>
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {isDark ? (
+                  <Sun className="w-5 h-5 text-yellow-500" />
+                ) : (
+                  <Moon className="w-5 h-5 text-gray-600" />
+                )}
+              </button>
               <button 
                 onClick={() => setShowSurvey(true)}
                 className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
@@ -200,8 +239,18 @@ export default function Dashboard() {
         {/* Progress Dashboard */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Learning Progress */}
-          <div className="bg-white rounded-3xl shadow-xl p-8">
-            <h3 className="font-fredoka text-2xl text-gray-800 mb-6">Learning Progress</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="font-fredoka text-2xl text-gray-800 dark:text-white">Learning Progress</h3>
+              <button
+                onClick={() => continueLearningMutation.mutate()}
+                disabled={continueLearningMutation.isPending}
+                className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                <Play className="w-4 h-4" />
+                <span>{continueLearningMutation.isPending ? "Learning..." : "Continue"}</span>
+              </button>
+            </div>
             
             <div className="space-y-6">
               <ProgressBar 
@@ -233,8 +282,8 @@ export default function Dashboard() {
           </div>
           
           {/* Recent Achievements */}
-          <div className="bg-white rounded-3xl shadow-xl p-8">
-            <h3 className="font-fredoka text-2xl text-gray-800 mb-6">Recent Achievements</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8">
+            <h3 className="font-fredoka text-2xl text-gray-800 dark:text-white mb-6">Recent Achievements</h3>
             
             <div className="space-y-4">
               {achievements?.slice(0, 3).map((achievement) => (

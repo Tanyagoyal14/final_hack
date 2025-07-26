@@ -10,14 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-**January 26, 2025 - Project Migration Completed**
+**January 26, 2025 - Project Migration and Feature Updates Completed**
 - Successfully migrated MagiLearn from Replit Agent to Replit environment
-- Fixed color contrast issues for better text visibility
-- Resolved TypeScript errors in storage and frontend components
-- Applied clean white background with high-contrast text colors
-- Updated CSS for better readability and accessibility
-- Database connection established with PostgreSQL
-- All API endpoints working correctly (user, progress, games, achievements, spins)
+- Fixed color contrast issues for better text visibility with clean white background
+- Resolved TypeScript errors in storage and frontend components  
+- Database connection established with PostgreSQL - all API endpoints working
+- **User Changes**: Updated default user from "Alex Martinez" to "Tanya Goyal"
+- **Progress System**: Reset all skills to start at 0% for fresh learning experience
+- **Continue Learning**: Added "Continue" button that increases all skills by 5% and awards 25 XP
+- **Theme Switching**: Added light/dark mode toggle with sun/moon icons
+- Enhanced UI with proper dark mode support across all components
 
 ## System Architecture
 

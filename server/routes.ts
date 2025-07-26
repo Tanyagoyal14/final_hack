@@ -150,6 +150,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Continue learning progress
+  app.post("/api/user/continue-learning", async (req, res) => {
+    try {
+      const currentProgress = await storage.getUserProgress("default-user");
+      if (!currentProgress) {
+        return res.status(404).json({ message: "Progress not found" });
+      }
+
+      // Increase all skills by 5%
+      const updatedProgress = await storage.updateUserProgress("default-user", {
+        totalXp: (currentProgress.totalXp || 0) + 25,
+        mathSkills: Math.min(100, (currentProgress.mathSkills || 0) + 5),
+        englishSkills: Math.min(100, (currentProgress.englishSkills || 0) + 5),
+        scienceSkills: Math.min(100, (currentProgress.scienceSkills || 0) + 5),
+        codingSkills: Math.min(100, (currentProgress.codingSkills || 0) + 5),
+        artSkills: Math.min(100, (currentProgress.artSkills || 0) + 5),
+        languageSkills: Math.min(100, (currentProgress.languageSkills || 0) + 5),
+        problemSolving: Math.min(100, (currentProgress.problemSolving || 0) + 5),
+        memorySkills: Math.min(100, (currentProgress.memorySkills || 0) + 5),
+        lastActiveDate: new Date(),
+      });
+
+      res.json({ progress: updatedProgress, message: "Great progress! Keep learning!" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update progress" });
+    }
+  });
+
   // Play game and update stats
   app.post("/api/games/:gameId/play", async (req, res) => {
     try {
