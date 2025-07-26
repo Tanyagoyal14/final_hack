@@ -71,9 +71,8 @@ export const gameStats = pgTable("game_stats", {
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
   createdAt: true,
-});
+}).partial({ id: true });
 
 export const insertUserProgressSchema = createInsertSchema(userProgress).omit({
   id: true,

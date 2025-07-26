@@ -61,7 +61,6 @@ export class DatabaseStorage implements IStorage {
 
       // Create default user with enhanced survey data
       const defaultUser: InsertUser = {
-        id: "default-user",
         username: "Alex",
         password: "password",
         name: "Alex Martinez",
@@ -75,7 +74,8 @@ export class DatabaseStorage implements IStorage {
         accessibilityNeeds: [],
       };
 
-      await this.createUser(defaultUser);
+      const userWithId = { ...defaultUser, id: "default-user" } as InsertUser & { id: string };
+      await this.createUser(userWithId);
 
       // Create initial progress
       await this.updateUserProgress("default-user", {
@@ -415,8 +415,18 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
     const user: User = { 
-      ...insertUser, 
       id,
+      username: insertUser.username,
+      password: insertUser.password,
+      name: insertUser.name || null,
+      age: insertUser.age || null,
+      class: insertUser.class || null,
+      specialNeed: insertUser.specialNeed || null,
+      learningStyle: insertUser.learningStyle || null,
+      interests: (insertUser.interests as string[]) || null,
+      subjects: (insertUser.subjects as string[]) || null,
+      currentMood: insertUser.currentMood || null,
+      accessibilityNeeds: (insertUser.accessibilityNeeds as string[]) || null,
       createdAt: new Date(),
     };
     this.users.set(id, user);
@@ -443,6 +453,10 @@ export class MemStorage implements IStorage {
       userId,
       totalXp: 0,
       mathSkills: 0,
+      englishSkills: 0,
+      scienceSkills: 0,
+      codingSkills: 0,
+      artSkills: 0,
       languageSkills: 0,
       problemSolving: 0,
       memorySkills: 0,
@@ -537,7 +551,6 @@ export class MemStorage implements IStorage {
       lastPlayed: null,
       ...existing,
       ...stats,
-      lastPlayed: new Date(),
     };
     
     userStats.set(gameId, updated);

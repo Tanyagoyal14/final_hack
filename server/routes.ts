@@ -83,14 +83,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const today = new Date().toISOString().split('T')[0];
       const currentSpins = await storage.getDailySpins("default-user", today);
       
-      if (!currentSpins || currentSpins.spinsRemaining <= 0) {
+      if (!currentSpins || (currentSpins.spinsRemaining || 0) <= 0) {
         return res.status(400).json({ message: "No spins remaining" });
       }
       
       const updatedSpins = await storage.updateDailySpins(
         "default-user", 
         today, 
-        currentSpins.spinsUsed + 1
+        (currentSpins.spinsUsed || 0) + 1
       );
       
       // Randomly select a game to unlock
@@ -113,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentProgress = await storage.getUserProgress("default-user");
       if (currentProgress) {
         await storage.updateUserProgress("default-user", {
-          totalXp: currentProgress.totalXp + 50
+          totalXp: (currentProgress.totalXp || 0) + 50
         });
       }
       
@@ -168,12 +168,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const currentProgress = await storage.getUserProgress("default-user");
       if (currentProgress && xpEarned) {
         await storage.updateUserProgress("default-user", {
-          totalXp: currentProgress.totalXp + xpEarned,
+          totalXp: (currentProgress.totalXp || 0) + xpEarned,
           // Update skill based on game type
-          ...(gameId.includes("math") && { mathSkills: Math.min(100, currentProgress.mathSkills + 2) }),
-          ...(gameId.includes("memory") && { memorySkills: Math.min(100, currentProgress.memorySkills + 2) }),
-          ...(gameId.includes("puzzle") && { problemSolving: Math.min(100, currentProgress.problemSolving + 2) }),
-          ...(gameId.includes("word") && { languageSkills: Math.min(100, currentProgress.languageSkills + 2) }),
+          ...(gameId.includes("math") && { mathSkills: Math.min(100, (currentProgress.mathSkills || 0) + 2) }),
+          ...(gameId.includes("memory") && { memorySkills: Math.min(100, (currentProgress.memorySkills || 0) + 2) }),
+          ...(gameId.includes("puzzle") && { problemSolving: Math.min(100, (currentProgress.problemSolving || 0) + 2) }),
+          ...(gameId.includes("word") && { languageSkills: Math.min(100, (currentProgress.languageSkills || 0) + 2) }),
         });
       }
       
