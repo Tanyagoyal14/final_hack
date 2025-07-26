@@ -20,17 +20,28 @@ export default function Login() {
   const { toast } = useToast();
 
   const loginMutation = useMutation({
-    mutationFn: (data: { username: string; password: string }) =>
-      apiRequest("/api/auth/login", {
+    mutationFn: async (data: { username: string; password: string }) => {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
-      }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Login failed");
+      }
+      
+      return response.json();
+    },
     onSuccess: () => {
       toast({
         title: "Welcome back!",
         description: "You've successfully logged in to MagiLearn.",
       });
-      setLocation("/dashboard");
+      setLocation("/");
     },
     onError: (error: any) => {
       toast({

@@ -30,17 +30,28 @@ export default function Signup() {
   const { toast } = useToast();
 
   const signupMutation = useMutation({
-    mutationFn: (data: any) =>
-      apiRequest("/api/auth/signup", {
+    mutationFn: async (data: any) => {
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(data),
-      }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Signup failed");
+      }
+      
+      return response.json();
+    },
     onSuccess: () => {
       toast({
         title: "Account Created!",
         description: "Welcome to MagiLearn! You can now start your learning journey.",
       });
-      setLocation("/dashboard");
+      setLocation("/");
     },
     onError: (error: any) => {
       toast({
