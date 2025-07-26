@@ -7,50 +7,51 @@ import ProgressBar from "@/components/progress-bar";
 import SurveyModal from "@/components/survey-modal";
 import { AVAILABLE_GAMES } from "@/lib/games";
 import { Star, Trophy, Flame, WandSparkles } from "lucide-react";
+import type { User, UserProgress, DailySpins, UnlockedGame, Achievement } from "@shared/schema";
 
 export default function Dashboard() {
   const [showSurvey, setShowSurvey] = useState(false);
 
-  const { data: user } = useQuery({
+  const { data: user } = useQuery<User>({
     queryKey: ["/api/user/current"],
   });
 
-  const { data: progress } = useQuery({
+  const { data: progress } = useQuery<UserProgress>({
     queryKey: ["/api/user/progress"],
   });
 
-  const { data: spins } = useQuery({
+  const { data: spins } = useQuery<DailySpins>({
     queryKey: ["/api/user/spins"],
   });
 
-  const { data: unlockedGames } = useQuery({
+  const { data: unlockedGames } = useQuery<UnlockedGame[]>({
     queryKey: ["/api/user/games"],
   });
 
-  const { data: achievements } = useQuery({
+  const { data: achievements } = useQuery<Achievement[]>({
     queryKey: ["/api/user/achievements"],
   });
 
   const unlockedGameIds = unlockedGames?.map(game => game.gameId) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-white">
       <AccessibilityToolbar user={user} />
       
       {/* Main Navigation */}
-      <nav className="bg-white shadow-lg">
+      <nav className="bg-white shadow-lg border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-magic-purple to-pink-magic rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
                 <WandSparkles className="text-white text-lg" />
               </div>
-              <h1 className="font-fredoka text-2xl text-magic-purple">MagiLearn</h1>
+              <h1 className="font-bold text-2xl text-purple-700">MagiLearn</h1>
             </div>
             <div className="flex items-center space-x-6">
               <button 
                 onClick={() => setShowSurvey(true)}
-                className="bg-magic-purple text-white px-4 py-2 rounded-lg hover:bg-light-purple transition-colors font-medium"
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-medium"
               >
                 Update Survey
               </button>
@@ -63,7 +64,7 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Hero Section with Daily Stats */}
-        <div className="bg-gradient-to-r from-magic-purple to-pink-magic rounded-3xl p-8 mb-8 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-8 mb-8 text-white relative overflow-hidden">
           <div className="absolute top-4 right-4 text-6xl opacity-20">✨</div>
           <div className="absolute bottom-4 left-4 text-4xl opacity-20">🌟</div>
           
@@ -73,7 +74,7 @@ export default function Dashboard() {
             </h2>
             {user?.class && (
               <p className="text-lg opacity-90 mb-2">
-                {user.class} • Learning Style: {user.learningStyle?.charAt(0).toUpperCase() + user.learningStyle?.slice(1)}
+                {user.class} • Learning Style: {user.learningStyle?.charAt(0).toUpperCase() + user.learningStyle?.slice(1) || 'Visual'}
               </p>
             )}
             <p className="text-xl opacity-90 mb-6">
