@@ -44,6 +44,7 @@ export interface IStorage {
   // Game stats
   getGameStats(userId: string, gameId: string): Promise<GameStats | undefined>;
   updateGameStats(userId: string, gameId: string, stats: Partial<GameStats>): Promise<GameStats>;
+  getUserGameStats(userId: string): Promise<GameStats[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -266,6 +267,10 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return created;
     }
+  }
+
+  async getUserGameStats(userId: string): Promise<GameStats[]> {
+    return await db.select().from(gameStats).where(eq(gameStats.userId, userId));
   }
 }
 
@@ -533,28 +538,38 @@ export class MemStorage implements IStorage {
     return userStats?.get(gameId);
   }
 
-  async updateGameStats(userId: string, gameId: string, stats: Partial<GameStats>): Promise<GameStats> {
-    if (!this.gameStats.has(userId)) {
-      this.gameStats.set(userId, new Map());
+  async updateGameStats(userId: string, gameId: string, updates: Partial<GameStats>): Promise<GameStats> {
+    let userStats = this.gameStats.get(userId);
+    if (!userStats) {
+      userStats = new Map();
+      this.gameStats.set(userId, userStats);
     }
-    
-    const userStats = this.gameStats.get(userId)!;
+
     const existing = userStats.get(gameId);
-    
-    const updated: GameStats = {
-      id: existing?.id || randomUUID(),
-      userId,
-      gameId,
-      timesPlayed: 0,
-      bestScore: 0,
-      totalXpEarned: 0,
-      lastPlayed: null,
-      ...existing,
-      ...stats,
-    };
-    
-    userStats.set(gameId, updated);
-    return updated;
+    if (existing) {
+      const updated = { ...existing, ...updates, lastPlayed: new Date() };
+      userStats.set(gameId, updated);
+      return updated;
+    } else {
+      const newStats: GameStats = {
+        id: randomUUID(),
+        userId,
+        gameId,
+        timesPlayed: 1,
+        bestScore: 0,
+        totalXpEarned: 0,
+        lastPlayed: new Date(),
+        ...updates,
+      };
+      userStats.set(gameId, newStats);
+      return newStats;
+    }
+  }
+
+  async getUserGameStats(userId: string): Promise<GameStats[]> {
+    const userStats = this.gameStats.get(userId);
+    if (!userStats) return [];
+    return Array.from(userStats.values());
   }
 }
 

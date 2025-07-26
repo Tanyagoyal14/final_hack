@@ -2,17 +2,210 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { surveySchema } from "@shared/schema";
+import { aiService } from "./ai-service";
 import { z } from "zod";
+import bcrypt from "bcrypt";
+import session from "express-session";
+
+declare module 'express-session' {
+  interface SessionData {
+    userId?: string;
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Get current user (simplified - using default user)
-  app.get("/api/user/current", async (req, res) => {
+  // Session middleware
+  app.use(session({
+    secret: process.env.SESSION_SECRET || 'magilearn-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false, // set to true in production with HTTPS
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  }));
+
+  // Authentication middleware
+  const requireAuth = (req: any, res: any, next: any) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    next();
+  };
+
+  // Auth Routes
+  app.post("/api/auth/signup", async (req, res) => {
     try {
-      const user = await storage.getUser("default-user");
+      const { username, email, password, ...profileData } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password required" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already taken" });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create user
+      const user = await storage.createUser({
+        username,
+        email,
+        password: hashedPassword,
+        ...profileData,
+      });
+
+      // Set session
+      req.session.userId = user.id;
+
+      // Generate AI profile
+      try {
+        const progress = await storage.getUserProgress(user.id);
+        const gameStats = await storage.getUserGameStats(user.id);
+        
+        const aiProfile = await aiService.generateLearningProfile({
+          user,
+          progress: progress || {} as any,
+          gameStats: gameStats || [],
+          recentActivity: {
+            gamesPlayed: 0,
+            skillProgress: {},
+            streakDays: 0,
+          }
+        });
+
+        await storage.updateUser(user.id, {
+          aiLearningProfile: aiProfile,
+        });
+      } catch (aiError) {
+        console.log("AI profile generation failed, continuing without it");
+      }
+
+      res.json({ user: { ...user, password: undefined } });
+    } catch (error) {
+      console.error("Signup error:", error);
+      res.status(500).json({ message: "Failed to create account" });
+    }
+  });
+
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password required" });
+      }
+
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      const validPassword = await bcrypt.compare(password, user.password);
+      if (!validPassword) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      req.session.userId = user.id;
+      res.json({ user: { ...user, password: undefined } });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
+  app.get("/api/auth/me", requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.json(user);
+      res.json({ ...user, password: undefined });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get user info" });
+    }
+  });
+
+  // AI-powered recommendation endpoint
+  app.get("/api/ai/recommendations", requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId);
+      const progress = await storage.getUserProgress(req.session.userId);
+      
+      if (!user || !progress) {
+        return res.status(404).json({ message: "User data not found" });
+      }
+
+      const recommendations = await aiService.getPersonalizedRecommendations(user, progress);
+      res.json({ recommendations });
+    } catch (error) {
+      console.error("AI recommendations error:", error);
+      res.status(500).json({ message: "Failed to get recommendations" });
+    }
+  });
+
+  // AI profile analysis endpoint
+  app.post("/api/ai/analyze-progress", requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId);
+      const progress = await storage.getUserProgress(req.session.userId);
+      const gameStats = await storage.getUserGameStats(req.session.userId);
+      
+      if (!user || !progress) {
+        return res.status(404).json({ message: "User data not found" });
+      }
+
+      const aiProfile = await aiService.generateLearningProfile({
+        user,
+        progress,
+        gameStats: gameStats || [],
+        recentActivity: {
+          gamesPlayed: gameStats?.length || 0,
+          skillProgress: {
+            math: progress.mathSkills || 0,
+            english: progress.englishSkills || 0,
+            science: progress.scienceSkills || 0,
+            coding: progress.codingSkills || 0,
+            art: progress.artSkills || 0,
+          },
+          streakDays: progress.learningStreak || 0,
+        }
+      });
+
+      await storage.updateUser(req.session.userId, {
+        aiLearningProfile: aiProfile,
+      });
+
+      res.json({ profile: aiProfile });
+    } catch (error) {
+      console.error("AI analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze progress" });
+    }
+  });
+
+  // Get current user (updated to use session)
+  app.get("/api/user/current", async (req: any, res) => {
+    try {
+      // For backward compatibility, use default user if no session
+      const userId = req.session?.userId || "default-user";
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json({ ...user, password: undefined });
     } catch (error) {
       res.status(500).json({ message: "Failed to get user" });
     }

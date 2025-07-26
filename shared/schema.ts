@@ -7,6 +7,7 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  email: text("email").unique(),
   name: text("name"),
   age: integer("age"),
   class: text("class"),
@@ -16,6 +17,14 @@ export const users = pgTable("users", {
   subjects: jsonb("subjects").$type<string[]>(),
   currentMood: text("current_mood"),
   accessibilityNeeds: jsonb("accessibility_needs").$type<string[]>(),
+  aiLearningProfile: jsonb("ai_learning_profile").$type<{
+    strengths: string[];
+    challenges: string[];
+    recommendations: string[];
+    adaptiveDifficulty: number;
+    preferredContentTypes: string[];
+    lastAnalyzed: string;
+  }>(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

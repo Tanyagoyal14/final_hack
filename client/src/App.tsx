@@ -6,12 +6,16 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import Survey from "@/pages/survey";
 import Game from "@/pages/game";
+import Login from "@/pages/login";
+import Signup from "@/pages/signup";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
+      <Route path="/login" component={Login} />
+      <Route path="/signup" component={Signup} />
       <Route path="/survey" component={Survey} />
       <Route path="/game/:gameId" component={Game} />
       <Route component={NotFound} />
